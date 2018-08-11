@@ -4,10 +4,10 @@ import {
   editQuery,
   editVariables,
   editHeaders,
+  editWebSocketParameters,
   editEndpoint,
   setEditorFlex,
-  openQueryVariables,
-  closeQueryVariables,
+  setActiveConfigPanel,
   setVariableEditorHeight,
   setResponseTracingHeight,
   setTracingSupported,
@@ -73,6 +73,7 @@ export class Session extends Record(getDefaultSession('')) {
   filePath?: string
   selectedUserToken?: string
   headers?: string
+  webSocketParameters?: string
   absolutePath?: string
   isSettingsTab?: boolean
   isConfigTab?: boolean
@@ -83,7 +84,7 @@ export class Session extends Record(getDefaultSession('')) {
   isReloadingSchema: boolean
 
   responseExtensions: any
-  queryVariablesActive: boolean
+  activeConfigPanel: string
   endpointUnreachable: boolean
 
   // editor settings
@@ -189,10 +190,10 @@ const reducer = handleActions(
       editQuery,
       editVariables,
       editHeaders,
+      editWebSocketParameters,
       editEndpoint,
       setEditorFlex,
-      openQueryVariables,
-      closeQueryVariables,
+      setActiveConfigPanel,
       setVariableEditorHeight,
       setResponseTracingHeight,
       setTracingSupported,
@@ -240,16 +241,13 @@ const reducer = handleActions(
         Map({ responseTracingHeight, responseTracingOpen: true }),
       )
     },
-    CLOSE_VARIABLES: (state, { payload: { variableEditorHeight } }) => {
+    SET_ACTIVE_CONFIG_PANEL: (
+      state,
+      { payload: { variableEditorHeight, activeConfigPanel } },
+    ) => {
       return state.mergeDeepIn(
         ['sessions', getSelectedSessionId(state)],
-        Map({ variableEditorHeight, variableEditorOpen: false }),
-      )
-    },
-    OPEN_VARIABLES: (state, { payload: { variableEditorHeight } }) => {
-      return state.mergeDeepIn(
-        ['sessions', getSelectedSessionId(state)],
-        Map({ variableEditorHeight, variableEditorOpen: true }),
+        Map({ variableEditorHeight, activeConfigPanel }),
       )
     },
     TOGGLE_VARIABLES: state => {

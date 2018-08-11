@@ -9,11 +9,16 @@
 import * as React from 'react'
 import onHasCompletion from './onHasCompletion'
 import { connect } from 'react-redux'
-import { editVariables, editHeaders } from '../../state/sessions/actions'
+import {
+  editVariables,
+  editHeaders,
+  editWebSocketParameters,
+} from '../../state/sessions/actions'
 import {
   getVariables,
   getVariableToType,
   getHeaders,
+  getWebSocketParameters,
 } from '../../state/sessions/selectors'
 import { createStructuredSelector } from 'reselect'
 import { VariableToType } from '../../state/sessions/reducers'
@@ -252,6 +257,17 @@ export const HeadersEditorComponent = connect(
   mapStateToHeadersProps,
   {
     onChange: editHeaders,
+  },
+)(VariableEditor)
+
+const mapStateToWebSocketParametersProps = createStructuredSelector({
+  value: getWebSocketParameters,
+})
+
+export const WebSocketParametersComponent = connect(
+  mapStateToWebSocketParametersProps,
+  {
+    onChange: editWebSocketParameters,
   },
 )(VariableEditor)
 

@@ -41,6 +41,7 @@ export const getEndpoint = makeSessionSelector('endpoint')
 export const getQuery = makeSessionSelector('query')
 export const getFile = makeSessionSelector('file')
 export const getVariables = makeSessionSelector('variables')
+export const getWebSocketParameters = makeSessionSelector('webSocketParameters')
 export const getResponses = makeSessionSelector('responses')
 export const getOperationName = makeSessionSelector('operationName')
 export const getQueryRunning = makeSessionSelector('queryRunning')
@@ -68,9 +69,7 @@ export const getCurrentQueryStartTime = makeSessionSelector(
 export const getCurrentQueryEndTime = makeSessionSelector('currentQueryEndTime')
 export const getIsReloadingSchema = makeSessionSelector('isReloadingSchema')
 export const getResponseExtensions = makeSessionSelector('responseExtensions')
-export const getQueryVariablesActive = makeSessionSelector(
-  'queryVariablesActive',
-)
+export const getActiveConfigPanel = makeSessionSelector('activeConfigPanel')
 export const getEndpointUnreachable = makeSessionSelector('endpointUnreachable')
 export const getEditorFlex = makeSessionSelector('editorFlex')
 export const getVariableEditorOpen = makeSessionSelector('variableEditorOpen')

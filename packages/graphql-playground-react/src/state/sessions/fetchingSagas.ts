@@ -49,6 +49,7 @@ export function setSubscriptionEndpoint(endpoint) {
 export interface LinkCreatorProps {
   endpoint: string
   headers?: Headers
+  connectionParams?: any
   credentials?: string
 }
 
@@ -60,10 +61,10 @@ export const defaultLinkCreator = (
   session: LinkCreatorProps,
   wsEndpoint?: string,
 ): { link: ApolloLink; subscriptionClient?: SubscriptionClient } => {
-  let connectionParams = {}
   const { headers, credentials } = session
+  let { connectionParams } = session
 
-  if (headers) {
+  if (headers && !connectionParams) {
     connectionParams = { ...headers }
   }
 
@@ -129,12 +130,14 @@ function* runQuerySaga(action) {
   yield put(setSubscriptionActive(isSubscription(operation)))
   yield put(startQuery())
   let headers = parseHeaders(session.headers)
+  const connectionParams = parseHeaders(session.webSocketParameters)
   if (session.tracingSupported && session.responseTracingOpen) {
     headers = set(headers, 'X-Apollo-Tracing', '1')
   }
   const lol = {
     endpoint: session.endpoint,
     headers,
+    connectionParams,
     credentials: settings['request.credentials'],
   }
 

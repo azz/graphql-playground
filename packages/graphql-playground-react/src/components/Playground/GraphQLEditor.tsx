@@ -20,6 +20,7 @@ import TopBar from './TopBar/TopBar'
 import {
   VariableEditorComponent,
   HeadersEditorComponent,
+  WebSocketParametersComponent,
 } from './VariableEditor'
 import { createStructuredSelector } from 'reselect'
 import {
@@ -35,7 +36,7 @@ import {
   getCurrentQueryEndTime,
   getTracingSupported,
   getEditorFlex,
-  getQueryVariablesActive,
+  getActiveConfigPanel,
   getHeaders,
   getOperations,
   getOperationName,
@@ -46,8 +47,7 @@ import {
   updateQueryFacts,
   stopQuery,
   runQueryAtPosition,
-  closeQueryVariables,
-  openQueryVariables,
+  setActiveConfigPanel,
   openVariables,
   closeVariables,
   openTracing,
@@ -76,8 +76,7 @@ export interface ReduxProps {
   updateQueryFacts: () => void
   runQueryAtPosition: (position: number) => void
   fetchSchema: () => void
-  openQueryVariables: () => void
-  closeQueryVariables: () => void
+  setActiveConfigPanel: (activeConfigPanel: string) => void
   openVariables: (height: number) => void
   closeVariables: (height: number) => void
   openTracing: (height: number) => void
@@ -102,7 +101,7 @@ export interface ReduxProps {
   editorFlex: number
   headers: string
   headersCount: number
-  queryVariablesActive: boolean
+  activeConfigPanel: string
   operationName: string
   query: string
   sessionId: string
@@ -132,6 +131,7 @@ class GraphQLEditor extends React.PureComponent<
   private responseResizer: any
   private queryVariablesRef
   private httpHeadersRef
+  private webSocketParametersRef
 
   componentDidMount() {
     // Ensure a form of a schema exists (including `null`) and
@@ -158,6 +158,9 @@ class GraphQLEditor extends React.PureComponent<
   }
 
   render() {
+    const setActiveConfigPanel = value => () =>
+      this.props.setActiveConfigPanel(value)
+
     return (
       <Container>
         <style jsx={true} global={true}>{`
@@ -251,44 +254,49 @@ class GraphQLEditor extends React.PureComponent<
                   onMouseDown={this.handleVariableResizeStart}
                 >
                   <VariableEditorSubtitle
-                    isOpen={this.props.queryVariablesActive}
+                    isOpen={this.props.activeConfigPanel === 'query-variables'}
                     innerRef={this.setQueryVariablesRef}
-                    onClick={this.props.openQueryVariables}
+                    onClick={setActiveConfigPanel('query-variables')}
                   >
                     Query Variables
                   </VariableEditorSubtitle>
                   <VariableEditorSubtitle
-                    isOpen={!this.props.queryVariablesActive}
+                    isOpen={this.props.activeConfigPanel === 'http-headers'}
                     innerRef={this.setHttpHeadersRef}
-                    onClick={this.props.closeQueryVariables}
+                    onClick={setActiveConfigPanel('http-headers')}
                   >
                     {'HTTP Headers ' +
                       (this.props.headersCount && this.props.headersCount > 0
                         ? `(${this.props.headersCount})`
                         : '')}
                   </VariableEditorSubtitle>
+                  <VariableEditorSubtitle
+                    isOpen={
+                      this.props.activeConfigPanel === 'websocket-parameters'
+                    }
+                    innerRef={this.setWebSocketParametersRef}
+                    onClick={setActiveConfigPanel('websocket-parameters')}
+                  >
+                    WebSocket Params
+                  </VariableEditorSubtitle>
                 </VariableEditorTitle>
-                {this.props.queryVariablesActive ? (
+                {this.props.activeConfigPanel === 'query-variables' ? (
                   <VariableEditorComponent
                     getRef={this.setVariableEditorComponent}
-                    onHintInformationRender={
-                      this.props.queryVariablesActive
-                        ? this.handleHintInformationRender
-                        : undefined
-                    }
+                    onHintInformationRender={this.handleHintInformationRender}
                     onRunQuery={this.runQueryAtCursor}
                   />
-                ) : (
+                ) : this.props.activeConfigPanel === 'http-headers' ? (
                   <HeadersEditorComponent
                     getRef={this.setVariableEditorComponent}
-                    onHintInformationRender={
-                      this.props.queryVariablesActive
-                        ? this.handleHintInformationRender
-                        : undefined
-                    }
                     onRunQuery={this.runQueryAtCursor}
                   />
-                )}
+                ) : this.props.activeConfigPanel === 'websocket-parameters' ? (
+                  <WebSocketParametersComponent
+                    getRef={this.setVariableEditorComponent}
+                    onRunQuery={this.runQueryAtCursor}
+                  />
+                ) : null}
               </VariableEditor>
               <QueryDragBar ref={this.setQueryResizer} />
             </QueryWrap>
@@ -333,6 +341,10 @@ class GraphQLEditor extends React.PureComponent<
 
   setHttpHeadersRef = ref => {
     this.httpHeadersRef = ref
+  }
+
+  setWebSocketParametersRef = ref => {
+    this.webSocketParametersRef = ref
   }
 
   setQueryResizer = ref => {
@@ -537,7 +549,8 @@ class GraphQLEditor extends React.PureComponent<
     if (
       wasOpen &&
       (downEvent.target === this.queryVariablesRef ||
-        downEvent.target === this.httpHeadersRef)
+        downEvent.target === this.httpHeadersRef ||
+        downEvent.target === this.webSocketParametersRef)
     ) {
       return
     }
@@ -606,7 +619,7 @@ const mapStateToProps = createStructuredSelector({
   currentQueryEndTime: getCurrentQueryEndTime,
   tracingSupported: getTracingSupported,
   editorFlex: getEditorFlex,
-  queryVariablesActive: getQueryVariablesActive,
+  activeConfigPanel: getActiveConfigPanel,
   headers: getHeaders,
   operations: getOperations,
   operationName: getOperationName,
@@ -622,8 +635,7 @@ export default withTheme<Props>(
       updateQueryFacts,
       stopQuery,
       runQueryAtPosition,
-      openQueryVariables,
-      closeQueryVariables,
+      setActiveConfigPanel,
       openVariables,
       closeVariables,
       openTracing,
